@@ -13,17 +13,17 @@ Adapted from the local `js-ts-commenting` skill and reconciled with this skill's
 
 ## Required phase prefixes: Input, Processing, Return
 
-The user explicitly requires these semantic step prefixes. Preserve them during reviews and refactoring; do not downgrade them to optional style or delete them under an anti-over-commenting rule. This is a user convention, not a claim that Code Complete mandates numbered comments.
+The user explicitly requires numeric step prefixes: `1.` means input, `2.` means processing, and `3.` means return. Write the number followed directly by the useful step description; do not insert category labels such as `Input:`, `Processing:`, or `Return:`. Preserve them during reviews and refactoring; do not downgrade them to optional style or delete them under an anti-over-commenting rule. This is a user convention, not a claim that Code Complete mandates numbered comments.
 
-- `1. Input:` Validate, normalize, or prepare inputs and the per-call context needed to consume them. In a factory, describe the supplied dependencies and per-instance state being prepared; do not imply that initialization validates data when it does not.
-- `2. Processing:` Perform the operation, coordinate effects, and make decisions. Use `2.1`, `2.2`, etc. for multiple processing steps, rather than introducing top-level `4.` or higher.
-- `3. Return:` Return or emit the outcome, resolve completion, or hand back an API/cleanup handle. The number identifies the responsibility, not the third statement or a requirement to use exactly three code blocks.
+- `1.` Validate, normalize, or prepare inputs and the per-call context needed to consume them. In a factory, describe the supplied dependencies and per-instance state being prepared; do not imply that initialization validates data when it does not.
+- `2.` Perform the operation, coordinate effects, and make decisions. Use `2.1`, `2.2`, etc. for multiple processing steps, rather than introducing top-level `4.` or higher.
+- `3.` Return or emit the outcome, resolve completion, or hand back an API/cleanup handle. The number identifies the responsibility, not the third statement or a requirement to use exactly three code blocks.
 
-For routines with multiple logical steps (including the source skill's longer-than-ten-lines routines with distinct phases), use these labels and keep explanatory text specific. Retain existing phase labels even when a routine becomes shorter. Tiny expressions need no fabricated input/processing blocks; when labeling a return-only routine, use `3. Return:` rather than inventing work. Place labels inside function bodies, never at module scope or on fields.
+For routines with multiple logical steps (including the source skill's longer-than-ten-lines routines with distinct phases), use these numeric prefixes and keep explanatory text specific. Retain existing numeric prefixes even when a routine becomes shorter. Tiny expressions need no fabricated input/processing blocks; when labeling a return-only routine, use `3.` rather than inventing work. Place labels inside function bodies, never at module scope or on fields.
 
-Use substeps such as `1.1 Input:` or `2.1 Processing:` when a phase needs detail. Early rejection stays with the input guard; do not move returns or restructure control flow to make numbering sequential. For async functions, explain what is awaited and what completion means. Cleanup in `finally` remains unconditional processing and must not be moved or described as success-only return. A returned cleanup function is the factory's return value and can have its own internal phases.
+Use substeps such as `1.1` or `2.1` when a phase needs detail. Early rejection stays with the input guard; do not move returns or restructure control flow to make numbering sequential. For async functions, explain what is awaited and what completion means. Cleanup in `finally` remains unconditional processing and must not be moved or described as success-only return. A returned cleanup function is the factory's return value and can have its own internal phases.
 
-In tests, `1. Input:` prepares fixtures, `2. Processing:` exercises behavior and verifies assertions, and `3. Return:` completes the test or returns fixture handles. Do not mislabel assertions as a returned value. Ordinary why-comments and compiler directives remain valid without prefixes; the convention applies to step markers, not every comment.
+In tests, `1.` prepares fixtures, `2.` exercises behavior and verifies assertions, and `3.` completes the test or returns fixture handles. Do not mislabel assertions as a returned value. Ordinary why-comments and compiler directives remain valid without prefixes; the convention applies to step markers, not every comment.
 
 ## Original TypeScript before/after examples
 
@@ -112,16 +112,16 @@ After: the required prefixes identify normalization, processing, and the returne
 
 ```ts
 export function summaryAfter(input: string, publish: (tokens: readonly string[]) => void): number {
-  // 1. Input: Normalize surrounding whitespace without changing token case.
+  // 1. Normalize surrounding whitespace without changing token case.
   const normalized = input.trim();
 
-  // 2. Processing: Preserve first occurrence order when removing exact duplicate tokens.
+  // 2. Preserve first occurrence order when removing exact duplicate tokens.
   const tokens = normalized === '' ? [] : normalized.split(/\s+/);
   const uniqueTokens = [...new Set(tokens)];
 
   publish(uniqueTokens);
 
-  // 3. Return: Report the size of the token set that was published.
+  // 3. Report the size of the token set that was published.
   return uniqueTokens.length;
 }
 ```
