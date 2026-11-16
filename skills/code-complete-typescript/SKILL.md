@@ -39,7 +39,7 @@ When scoped code can throw, reject, recover, or own resources, apply [exception-
 
 ## Required commenting review
 
-For scoped JS/TS/TSX code, apply [commenting.md](references/commenting.md). Document public contracts and non-obvious constraints, failure behavior, ownership, and ordering. Prefer clearer names or structure over comments that narrate mechanics. Verify comments against implementation and tests; remove stale claims. Preserve the user-required step prefixes: `1.`, `2.`, and `3.`. Use numbered phase comments for multi-step routines and substeps for detail; do not remove them as redundant style. See the reference for early returns, asynchronous work, and cleanup. Comment-only work must preserve executable behavior and compiler/linter directives.
+For scoped JS/TS/TSX code, apply [commenting.md](references/commenting.md). Document public contracts and non-obvious constraints, failure behavior, ownership, and ordering. Prefer clearer names or structure over comments that narrate mechanics. Verify comments against implementation and tests; remove stale claims. Preserve the user-required step prefixes: `1.`, `2.`, and `3.`. Use numbered phase comments for multi-step routines and substeps for detail; do not remove them as redundant style. See the reference for early returns, asynchronous work, and cleanup. Apply the required [logical-block spacing rules](references/logical-block-spacing.md): separate major phases and distinct substeps with a blank line, while keeping each cohesive group together. Comment and spacing edits must preserve executable behavior and compiler/linter directives.
 
 ## Review output
 

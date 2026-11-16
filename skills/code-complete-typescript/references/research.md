@@ -13,6 +13,7 @@ The [user-supplied PDF](https://khmerbamboo.wordpress.com/wp-content/uploads/201
 - **11.1–11.2:** Names should communicate specific meaning, including the role of boolean and status variables. [Chapter summary](https://www.oreilly.com/library/view/code-complete-2nd/0735619670/ch11s08.html).
 - **18; 19.1, 19.4:** Tables can express uniform mappings; named partial tests and reduced nesting can clarify control flow. [Control summary](https://www.oreilly.com/library/view/code-complete-2nd/0735619670/ch19s07.html).
 - **24.4:** Preserve a recoverable starting point and refactor in small steps. [Section preview](https://www.oreilly.com/library/view/code-complete-2nd/0735619670/ch24s04.html).
+- **31, printed pp. 737, 747–748:** Related statements form code paragraphs; blank lines distinguish separate responsibilities and reveal organization. The blank-line reference applies this guidance to original TypeScript examples. The exact numeric prefixes and single-blank-line convention are user/project requirements, not quoted book rules.
 - **32.5:** Improve code itself and use comments for intent and surprising constraints, not redundant narration.
 
 [Publisher edition information](https://www.microsoftpressstore.com/store/code-complete-9780735619678) and the [author's book listing](https://stevemcconnell.com/books/) establish provenance. The skill does not reproduce the book or its checklists.

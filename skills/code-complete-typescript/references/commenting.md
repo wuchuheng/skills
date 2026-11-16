@@ -9,7 +9,7 @@ Adapted from the local `js-ts-commenting` skill and reconciled with this skill's
 - Document complex private algorithms and business rules with their approach, invariant, or reason. Simple private helpers need no ceremonial JSDoc. Prefer a meaningful name or cohesive extraction before adding explanatory prose.
 - Comments must agree with current code and tests. Remove stale, misleading, and mechanically redundant comments. Preserve `@ts-expect-error`, lint directives, coverage directives, license notices, and tooling annotations unless their removal is deliberately justified and verified.
 - Test names should convey the trigger and observable outcome. Add comments for fixture ownership, deliberately invalid values, race coordination, or why a regression matters. Do not narrate every arrange/act/assert statement.
-- Separate logical groups with blank lines and end prose sentences with periods. Let the repository formatter determine layout. Do not put sensitive sample payloads or credentials in comments.
+- Separate major phases and distinct logical substeps with a blank line, as required by [logical-block-spacing.md](logical-block-spacing.md). Keep a step comment attached to its code. End prose sentences with periods. Use the repository formatter without treating formatter success as proof of logical grouping. Do not put sensitive sample payloads or credentials in comments.
 
 ## Required phase prefixes: Input, Processing, Return
 
