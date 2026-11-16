@@ -11,6 +11,68 @@ Adapted from the local `js-ts-commenting` skill and reconciled with this skill's
 - Test names should convey the trigger and observable outcome. Add comments for fixture ownership, deliberately invalid values, race coordination, or why a regression matters. Do not narrate every arrange/act/assert statement.
 - Separate major phases and distinct logical substeps with a blank line, as required by [logical-block-spacing.md](logical-block-spacing.md). Keep a step comment attached to its code. End prose sentences with periods. Use the repository formatter without treating formatter success as proof of logical grouping. Do not put sensitive sample payloads or credentials in comments.
 
+## Mandatory documentation for constants and static variables
+
+Every named constant and static-storage variable in the target scope must have standard JSDoc immediately above its declaration. The comment must explain **what the value or storage represents** and **why it exists or how it is used**. A descriptive name does not exempt it. Missing either explanation fails checklist C6; repair it directly in the default repair mode.
+
+Scope includes module-level data bindings (exported or private), class static fields where the existing architecture uses them, fixed policy constants declared inside functions, symbol markers, enums and their members, and `as const` value catalogs and their members. Document a catalog's overall purpose and each member's domain meaning. A per-call computed local binding such as `const reply = await invoke()` is not a static variable or fixed policy constant merely because JavaScript uses `const`; document that operation under the existing phase/intent rules. Function-valued declarations follow the function-documentation rules rather than duplicating those rules as constant documentation.
+
+Use `/** ... */`, complete sentences, and the project's standard JSDoc style. Add units and the policy behind numeric values where relevant. For mutable static/module storage, describe ownership, lifetime, and reset/invalidation behavior; do not call it immutable. For serialized values, state the protocol role or compatibility constraint. Do not invent a rationale: inspect consumers and tests, or state the known purpose and identify an unresolved rationale. Do not add new shared mutable state merely to illustrate this documentation rule in production code.
+
+Keep each comment attached to its declaration and separate different declarations with blank lines. Do not use `1.x`, `2.x`, or `3.x` on module declarations or fields. Avoid tautologies such as “The timeout constant.” These declaration comments are mandatory even when general guidance says obvious code needs no comment; write useful meaning and purpose instead of removing the documentation.
+
+### Before and after: policy constants and domain values
+
+Before:
+
+```ts
+export const STARTUP_TIMEOUT_MS_BEFORE = 5_000;
+export const CommandBeforeDocs = { Check: 'check', Dispose: 'dispose' } as const;
+```
+
+After (the illustrative names differ; runtime values do not):
+
+```ts
+/**
+ * Maximum time in milliseconds to wait for Worker readiness.
+ * Bounds startup so callers do not wait indefinitely for an unavailable Worker.
+ */
+export const STARTUP_TIMEOUT_MS_AFTER = 5_000;
+
+/** Stable command names shared by bridge senders and dispatchers to avoid wire-value drift. */
+export const CommandAfterDocs = {
+  /** Requests a check of the submitted text snapshot through the Worker bridge. */
+  Check: 'check',
+  /** Requests session cleanup so the bridge can release owned resources. */
+  Dispose: 'dispose',
+} as const;
+```
+
+### Before and after: existing mutable module storage
+
+This isolated example describes existing storage; it is not a recommendation to introduce a singleton cache.
+
+```ts
+let cachedModuleBefore: object | undefined;
+
+/**
+ * Module-owned cache of the initialized plugin shared by callers in this module instance.
+ * Avoids repeated initialization; clearCachedPlugin resets it when the plugin is replaced.
+ */
+let cachedModuleAfter: object | undefined;
+
+export function clearCachedPluginBefore(): void {
+  cachedModuleBefore = undefined;
+}
+
+/** Clears the cached plugin so a later initialization can supply its replacement. */
+export function clearCachedPlugin(): void {
+  cachedModuleAfter = undefined;
+}
+```
+
+The check concerns the storage contract, not whether the identifier uses uppercase or whether its initializer happens to be a literal. It never substitutes for the architecture checks governing whether shared mutable storage should exist at all.
+
 ## Required phase prefixes: Input, Processing, Return
 
 The user explicitly requires numeric step prefixes: `1.` means input, `2.` means processing, and `3.` means return. Write the number followed directly by the useful step description; do not insert category labels such as `Input:`, `Processing:`, or `Return:`. Preserve them during reviews and refactoring; do not downgrade them to optional style or delete them under an anti-over-commenting rule. This is a user convention, not a claim that Code Complete mandates numbered comments.

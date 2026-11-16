@@ -20,7 +20,7 @@ A code review and refactoring guide for making TypeScript easier to understand a
 - **Reuse:** Consolidate repeated same-rule logic into cohesive helpers and repeated same-domain literals into canonical constants, value objects, or enums. Track occurrences, migrate consumers, and verify ownership and dependency direction.
 - **Types and failures:** Validate untrusted data, use meaningful internal types, and make exception handling and cleanup ownership explicit.
 - **Architecture:** Make lifecycle transitions, dispatch coverage, and effect ordering auditable; use deterministic coordination in race tests and accurate language-tagged documentation examples.
-- **Comments:** Document contracts and intent, and preserve numbered input, processing, and return steps.
+- **Comments:** Require meaning-and-purpose JSDoc on constants and static variables, document contracts and intent, and preserve numbered input, processing, and return steps.
 - **Safe changes:** Distinguish behavior-preserving refactoring from bug fixes and API changes. Run supported project commands in order: format, lint, then tests. Fix failures and restart from formatting until verification passes.
 
 By default, invoking the skill reviews and directly fixes applicable issues, then rechecks the checklist and repeats verification until all applicable items pass. No separate fix approval is needed for ordinary scoped repairs. Explicit review-only or teaching-only requests override that default. Without an explicit target, reviews cover current staged, unstaged, and relevant untracked changes. A mandatory applicability checklist tracks requirements and is rechecked after repairs. It is not a general security audit or a formatting-only tool.

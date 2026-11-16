@@ -84,9 +84,13 @@ type StatusBefore = 'open' | 'accepted' | 'ignored';
 export function initialBefore(): StatusBefore { return 'open'; }
 export function canAcceptBefore(status: StatusBefore): boolean { return status === 'open'; }
 
+/** Finding decision states shared by session logic and callers to keep status checks consistent. */
 export const FindingStatus = {
+  /** Identifies a pending finding that can still receive a decision. */
   Open: 'open',
+  /** Records approval so subsequent logic can distinguish an accepted finding. */
   Accepted: 'accepted',
+  /** Records dismissal so subsequent logic can exclude ignored findings. */
   Ignored: 'ignored',
 } as const;
 export type FindingStatus = typeof FindingStatus[keyof typeof FindingStatus];
@@ -108,8 +112,11 @@ export function encodeBefore(command: 'check' | 'dispose'): string {
   return JSON.stringify({ command });
 }
 
+/** Stable command codes used to encode session operations for transport. */
 export enum SessionCommand {
+  /** Selects the text-check operation in the remote dispatcher. */
   Check = 'check',
+  /** Selects session cleanup in the remote dispatcher. */
   Dispose = 'dispose',
 }
 
@@ -129,7 +136,10 @@ export function deadlinesBefore(startedAtMs: number): readonly number[] {
   return [startedAtMs + 5000, startedAtMs + 5000];
 }
 
+/** Worker-readiness deadline in milliseconds, used to bound startup waiting. */
 const WORKER_STARTUP_TIMEOUT_MS = 5_000;
+
+/** Notification display duration in milliseconds, used to schedule its dismissal. */
 const NOTIFICATION_VISIBLE_DURATION_MS = 5_000;
 
 export function deadlinesAfter(startedAtMs: number): readonly number[] {
@@ -163,9 +173,11 @@ export function endsSessionBefore(command: CommandBefore): boolean {
   }
 }
 
-// In a real feature, place this vocabulary in its permitted contract/policy owner.
+/** Shared session command vocabulary that keeps dispatchers on the same wire values. */
 export const Command = {
+  /** Selects checking behavior when routing a session operation. */
   Check: 'check',
+  /** Selects cleanup behavior when routing a session operation. */
   Dispose: 'dispose',
 } as const;
 export type Command = typeof Command[keyof typeof Command];
