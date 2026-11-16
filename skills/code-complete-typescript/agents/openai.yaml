@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Complete for TypeScript"
+  short_description: "Improve TypeScript readability and maintainability"
+  default_prompt: "Use $code-complete-typescript to review this TypeScript code and simplify it while preserving its behavior."
