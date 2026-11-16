@@ -4,17 +4,29 @@
 
 The purpose of import-path refactoring is shorter, readable paths, not maximizing alias usage. Compare the relative and supported alias forms for the same target module, using the characters inside the import quotes. Choose the shorter valid form while preserving public entry points, runtime resolution, and ownership boundaries. Do not abbreviate directory names or introduce opaque aliases solely to win a character count.
 
+### Alias boundary
+
+Keep `@/` mapped exclusively to `src/`. Do not remap it to the repository root, add an `@/tests/` override, or introduce additional aliases such as `@tests/` for this rule. For targets outside `src/`, retain relative imports; external packages and built-ins keep their existing module specifiers. The target location decides applicability: a test importing production code inside `src/` still qualifies for comparison.
+
+For example, from `tests/unit/features/writing/finding-session/session-client.spec.ts`, retain this import (illustrative project fragment):
+
+```ts
+import { createFixtureEvents, FixtureEvent } from '../../../../support/finding-session-events';
+```
+
+It resolves to `tests/support/finding-session-events.ts`. An `@/tests/support/...` spelling would resolve inside `src/tests/support/`, so it is not a valid alternative. Record this as outside the alias boundary under I1, not as an unresolved shortening task.
+
 ### Required comparison before editing
 
 For each import under review, perform these steps before deciding to rewrite or retain it:
 
-1. Resolve the current import to its actual module and identify the permitted relative and source-alias candidates from the importing file.
+1. Resolve the current import to its actual module. For a target inside `src/`, derive relative and `@/` candidates from the importing file. For a target outside `src/`, record the boundary decision above and skip the alias comparison.
 2. Verify that both candidates resolve to the same module through the applicable tools and respect the same public boundary. An unsupported alias is only a proposed candidate until its mapping is configured and verified.
 3. Compare the lengths of the two valid module specifiers, excluding quote characters. Record both candidate strings, their lengths, and the decision in the working checklist evidence; this can be a compact grouped table for many imports.
 4. Use the shorter candidate. If lengths are equal, keep the current import. If only one candidate is valid, keep that valid form and record why the other is unavailable. Do not change a path first and compare afterward.
 5. Apply the selected changes, then sort imports and verify resolution using the checks below. A decision to retain the current shorter path counts as a completed check, not unfinished work.
 
-Do not assume that every alias is shorter or that every relative import needs replacement. This comparison is required even when the final decision is to keep the current path.
+Do not assume that every alias is shorter or that every relative import needs replacement. For targets inside `src/`, this comparison is required even when the final decision is to keep the current path.
 
 - If `@/...` is shorter than the current relative path, use the alias after verifying support.
 - If the alias is longer, keep the current relative path; this passes I1 and needs no exception or refactoring task.
@@ -30,7 +42,7 @@ import { startSessionServer } from './session-server';
 
 Do not expand it to `@/features/writing/finding-session/worker-message/session-server`. Conversely, the deep traversal example below benefits from `@/`. Both decisions satisfy the same rule.
 
-If there is no established alias and the mapping would shorten target imports, inspect the source layout and configure `@/` to the actual source directory directly in default repair mode. This includes necessary configuration edits and target import migration, without a separate permission question for ordinary reversible changes. Respect explicit read-only instructions, source ownership, and user restrictions. If `@/` already has another meaning, preserve that contract and use the established suitable alias; do not silently repoint it. In a multi-package workspace, respect package boundaries instead of mapping every package through one application's source directory.
+If `@/ → src/` is missing and would shorten scoped imports into `src/`, configure that mapping consistently in default repair mode. Do not introduce other aliases or map `@/` to a different source directory. If the project lacks `src/` or already assigns another meaning to `@/`, preserve its configuration and report the incompatibility rather than silently repointing the alias. Respect explicit read-only instructions and package boundaries.
 
 ### Establish actual support before rewriting paths
 
