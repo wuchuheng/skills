@@ -37,6 +37,16 @@ In explicit review-only mode, record findings without edits. Otherwise, turn app
 6. Keep refactorings small and reviewable. Preserve existing work and assertions. After fixes, complete the required format → lint → tests loop below. Focused tests can help diagnose failures but do not replace the supported project test command. Also run required typechecks and integration/build checks when the changed boundary calls for them. Add a regression case for an uncovered defect, not tests that merely mirror renamed helpers.
 7. For a refactor, stop when the requested scope is clearer and verified; report what improved, preserved behavior, checks actually run, and unresolved limitations. For review-only work, report recommendations and evidence limits without implying edits or requiring execution unavailable to the review. No automatic commits or unrelated configuration changes.
 
+## Mandatory names and nesting limit
+
+Every variable and constant name must communicate its domain meaning and role at its point of use. Review parameters, destructured bindings, loop variables, callbacks, caught errors, and static/module values; rename ambiguous bindings rather than relying on comments to decode them. Follow [names-and-nesting.md](references/names-and-nesting.md) and checklist R2.
+
+Control-flow nesting must be **three levels or fewer within each function or method**, including callbacks. A fourth level fails checklist R6 and must be refactored in default repair mode. Use safe guard clauses or cohesive named helpers with explicit inputs; preserve order, failure behavior, and cleanup. Count levels using the reference, not raw braces or line indentation. This is an explicit user requirement, not a universal threshold attributed to Code Complete.
+
+## Mandatory import paths and ordering
+
+Apply [import-paths.md](references/import-paths.md) and checklist I1–I2. Prefer the supported source alias (normally `@/` mapped to `src/`) for source-root and cross-directory imports instead of deep relative traversal. If no suitable alias exists, inspect the actual source root and all affected resolvers, then configure the minimal consistent mapping directly in default repair mode. Explicit review-only restrictions still apply. Do not claim support based on TypeScript paths alone. Sort imports using the project's established convention while preserving side-effect order, runtime resolution, and public feature boundaries.
+
 ## Required encapsulation and reuse review
 
 Before polishing a substantial logic block, consider whether it represents a cohesive operation that should become a named function. Reusing the same parameters does not make extraction pointless; shared inputs can reveal a missing domain operation. Look for existing canonical helpers before creating another implementation. Repeated logic expressing the same rule must have one canonical implementation; refactor its duplicate consumers to reuse it rather than merely suggesting reuse. A clear single-use operation can also justify extraction. Do not wait for an arbitrary third occurrence.
@@ -86,4 +96,4 @@ pnpm run format → pnpm run lint → pnpm run test → all pass
 
 For each material finding give: severity, location, the reader's specific difficulty, its maintenance consequence, the proposed repair, and the behavior that must remain unchanged. Distinguish a defect from an optional style preference. When useful, show a small TypeScript before/after pair; do not rewrite an entire file merely to illustrate one finding.
 
-Review completion requires evidence, not a numeric readability score. Long conditions, large functions, many parameters, or deep nesting are inspection signals—not automatic failures. Do not invent universal line counts, maximum name lengths, mandatory comment density, a ban on `unknown`, or a requirement that every function be generic.
+Review completion requires evidence, not a numeric readability score. Long conditions, large functions, and many parameters are inspection signals—not automatic failures. Nesting beyond three control-flow levels is an explicit mandatory failure under this skill. Do not invent universal line counts, maximum name lengths, mandatory comment density, a ban on `unknown`, or a requirement that every function be generic.

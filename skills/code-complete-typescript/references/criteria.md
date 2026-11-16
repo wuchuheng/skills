@@ -8,10 +8,11 @@ A reader should be able to identify the operation's purpose, valid input/state, 
 
 | Area | Observable acceptance criterion | Typical repair / example |
 | --- | --- | --- |
-| Conditions | The condition expresses a recognizable decision without mentally combining unrelated policies. Evaluation order remains visible. | Guards for rejection paths; a named predicate for a domain rule; a decision table for a fixed mapping. Examples 1, 2, 10. |
-| Names | Names identify domain meaning, role, and units where ambiguous. A function's name does not conceal important effects. | `requestTimeoutMs`, `pendingResponses`, `saveInvoice`; avoid `x`, `temp`, `processData` when their meaning is not local and obvious. Examples 3–5. |
+| Conditions | The condition expresses a recognizable decision without mentally combining unrelated policies. Evaluation order remains visible; control-flow nesting never exceeds three levels per routine. | Guards for rejection paths; a named predicate for a domain rule; a decision table for a fixed mapping. Examples 1, 2, 10. |
+| Names | Every variable and constant name identifies its meaning and role; include units where ambiguous. A function's name does not conceal important effects. | `requestTimeoutMs`, `pendingResponses`, `saveInvoice`; avoid `x`, `temp`, `processData` when their meaning is not local and obvious. Examples 3–5. |
 | Routines | A routine has a coherent purpose and consistent abstraction level. A caller need not understand its private storage representation. | Extract a domain calculation from orchestration; avoid splitting every few lines into `step1`, `step2`. Example 5. |
 | Variables | Each variable has one meaning, is initialized before use, and has the smallest useful scope. | Distinct names for totals and counts; local `const` values where reassignment is unnecessary. Example 4. |
+| Imports | Source aliases replace deep source-root traversal and imports are consistently sorted without altering initialization or feature boundaries. | Apply [import-paths.md](import-paths.md); verify compiler, build, and runtime/test resolution. |
 | Boundary types | Untrusted values are checked at entry. Once validated, domain code receives a useful type. | `unknown` plus a parser at JSON/Worker boundaries; typed parameters internally. Examples 6, 7. |
 | State models | Permitted variants and their required data are explicit; callers do not guess relationships between optional fields. | Discriminated union where states are mutually exclusive. Model/API changes require compatible caller migration. Example 8. |
 | Defaults | Missing values are distinguished from valid zero, false, and empty strings according to the contract. | Use nullish defaults only if those falsy values are valid. Example 9 is a bug fix, not neutral cleanup. |
@@ -21,6 +22,8 @@ A reader should be able to identify the operation's purpose, valid input/state, 
 | Tests | The test names the triggering situation and observable result; important boundary cases are visible. | Preserve public assertions; test failed guards, empty inputs, invalid payloads, and cleanup where relevant. Example 13. |
 | Reuse and domain literals | Repeated same-rule logic and same-domain runtime literals must use a canonical owner, even with only two occurrences. Extracted units remain cohesive and dependency direction remains valid. | Apply [encapsulation and reuse](encapsulation-and-reuse.md); distinguish shared policy from coincidentally equal values. |
 | Abstraction cost | Each helper/type reduces what a reader must track; it does not just move a branch elsewhere. | Keep a simple switch or loop when a table, generic type, or wrapper would add indirection. Examples 5, 10. |
+
+Apply the mandatory [names and nesting rules](names-and-nesting.md) when assessing these criteria. A fourth control-flow level requires repair; readable naming is required for every binding in the target scope.
 
 ## Choosing a conditional repair
 

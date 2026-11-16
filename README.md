@@ -16,24 +16,42 @@ This repository currently contains one skill. The list below covers every skill 
 
 A code review and refactoring guide for making TypeScript easier to understand and maintain. Use it when reviewing a change, simplifying a working module, or learning how to improve code through before/after examples.
 
-- **Readability:** Improve names, simplify conditions, and organize cohesive functions.
+- **Readability:** Require meaningful variable/constant names and at most three control-flow nesting levels per routine. Refactor deeper logic using safe guards or cohesive helpers.
+- **Imports:** Prefer supported source aliases such as `@/`, configure missing mappings consistently across affected tools, and sort imports while preserving initialization order.
 - **Reuse:** Consolidate repeated same-rule logic into cohesive helpers and repeated same-domain literals into canonical constants, value objects, or enums. Track occurrences, migrate consumers, and verify ownership and dependency direction.
 - **Types and failures:** Validate untrusted data, use meaningful internal types, and make exception handling and cleanup ownership explicit. Require every catch or rejection handler to recover, propagate, report once at its owner, or justify safe suppression.
 - **Architecture:** Make lifecycle transitions, dispatch coverage, and effect ordering auditable; use deterministic coordination in race tests and accurate language-tagged documentation examples.
-- **Comments:** Require meaning-and-purpose JSDoc on constants and static variables, document contracts and intent, and preserve numbered input, processing, and return steps.
+- **Comments:** Require meaning-and-purpose JSDoc on constants and static variables. Document contracts and intent; enforce correctly classified phase/substep numbers and blank lines between logical blocks.
 - **Safe changes:** Distinguish behavior-preserving refactoring from bug fixes and API changes. Run supported project commands in order: format, lint, then tests. Fix failures and restart from formatting until verification passes.
 
-By default, invoking the skill reviews and directly fixes applicable issues, then rechecks the checklist and repeats verification until all applicable items pass. No separate fix approval is needed for ordinary scoped repairs. Explicit review-only or teaching-only requests override that default. Without an explicit target, reviews cover current staged, unstaged, and relevant untracked changes. A mandatory applicability checklist tracks requirements and is rechecked after repairs. It is not a general security audit or a formatting-only tool.
+By default, invoking the skill reviews and directly fixes applicable issues, then rechecks the checklist and repeats verification until all applicable items pass. No separate fix approval is needed for ordinary scoped repairs. Explicit review-only or teaching-only requests override that default. Without an explicit target, reviews cover current staged, unstaged, and relevant untracked changes. The [mandatory checklist](skills/code-complete-typescript/references/review-checklist.md) records each requirement as pending, pass, fail, not applicable, or blocked, with evidence. It is rechecked after repairs. Unsupported commands are reported explicitly; blockers prevent an unqualified completion claim. The skill does not commit or push without a separate user request. It is not a general security audit or a formatting-only tool.
 
 Read the [skill instructions](skills/code-complete-typescript/SKILL.md) for its workflow and links to detailed references.
 
-Numbered step comments use `1.` for input, `2.` for processing, and `3.` for return. Write the useful description directly after the number, without category labels:
+Numbered step comments use `1.x` for argument validation/defaults/normalization, `2.x` for business processing (including business-rule checks), and `3.x` for the final result. Multiple operations within a phase require individual substep comments and blank lines. Write the description directly after the number, without labels such as `Processing:`:
 
 ```ts
-// 1. Normalize the supplied text.
-// 2. Collect unique tokens in their original order.
-// 3. Return the token count.
+/**
+ * Counts distinct whitespace-delimited tokens without changing their case.
+ * @param text - Text whose repeated tokens should count once.
+ * @returns The number of distinct tokens, or zero for whitespace-only input.
+ */
+export function countUniqueTokens(text: string): number {
+  // 1. Normalize surrounding whitespace.
+  const normalizedText = text.trim();
+
+  // 2.1 Split nonempty text into tokens.
+  const tokens = normalizedText === '' ? [] : normalizedText.split(/\s+/);
+
+  // 2.2 Preserve one occurrence of each exact token.
+  const uniqueTokens = new Set(tokens);
+
+  // 3. Return the distinct token count.
+  return uniqueTokens.size;
+}
 ```
+
+See [names and nesting](skills/code-complete-typescript/references/names-and-nesting.md) for the precise depth-counting rules and [import paths](skills/code-complete-typescript/references/import-paths.md) for alias setup, ordering, and runtime-resolution checks.
 
 This is a practical adaptation of Steve McConnell's *Code Complete*, second edition, with additional TypeScript and author conventions. It is not an official certification or a reproduction of the book.
 
@@ -69,21 +87,29 @@ See the [official Skills CLI reference](https://github.com/vercel-labs/skills/bl
 
 ## Use
 
-After installation, ask your agent to use the skill for a bounded task. For example:
+After installation, invoke the skill for the default review-and-repair workflow:
+
+```text
+Use code-complete-typescript on the current changes.
+```
+
+The agent checks staged, unstaged, and relevant untracked files, repairs applicable issues directly, and repeats the checklist and supported verification commands until they pass or a concrete blocker remains. To limit the target, name a file or directory in the request.
+
+To request findings without edits, say so explicitly:
 
 ```text
 Use code-complete-typescript to review the current TypeScript changes.
 Report readability and maintainability findings without editing files.
 ```
 
-For the default review-and-repair workflow:
+For teaching without project edits:
 
 ```text
-Use code-complete-typescript to improve the readability of this module.
-Preserve behavior, keep the changes focused, and run the relevant checks.
+Use code-complete-typescript to explain how to reduce nested control flow.
+Show TypeScript before-and-after examples without changing project files.
 ```
 
-The skill distinguishes review, refactoring, and teaching. It requires explicit attention to observable behavior, failure paths, ownership, and verification.
+Default repairs preserve established contracts. Public API redesign, new business requirements, and external publication remain outside that default scope.
 
 ## Layout
 
