@@ -23,7 +23,7 @@ If the user specifies files, a directory, a diff, or a revision range, use that 
 
 Review changed hunks in their enclosing routines and types. Read callers, contracts, and tests as needed to establish behavior; this contextual reading does not authorize unrelated edits. Exclude generated/vendor files from manual rewriting and report any relevant excluded files. Honor explicit narrower scope, including staged-only requests. If the worktree is clean, report that there are no current changes and ask for a target only if needed; do not silently review the whole repository or choose a commit range. Outside Git, use provided files or ask for the missing scope.
 
-Before reviewing or fixing, instantiate the [mandatory requirement checklist](references/review-checklist.md) as a working TODO list in the response or available task tracker. Evaluate every requirement against the target; record applicability and evidence, not just a blanket promise to follow the skill. Do not create a repository tracking file unless requested or required by the project.
+Before reviewing or fixing, instantiate the [mandatory requirement checklist](references/review-checklist.md) as a user-visible table with one row per requirement ID. A private tracker or list of categories is not a substitute. Publish the initial assessment before repairs, update failed/pending items as work proceeds, and publish the complete final table with initial status, final status, and evidence for each ID. Evaluate every requirement against the target; record applicability and evidence, not just a blanket promise to follow the skill. Do not create a repository tracking file unless requested or required by the project.
 
 In explicit review-only mode, record findings without edits. Otherwise, turn applicable failures into repair tasks immediately, complete them, and recheck the full applicable checklist against the final changes without waiting for separate fix approval. Reinspect status/diffs to include newly edited files. Passing format/lint/tests does not replace this manual requirement check. Do not declare all issues fixed while applicable failures, pending checks, or blockers remain.
 
@@ -45,7 +45,7 @@ Control-flow nesting must be **three levels or fewer within each function or met
 
 ## Mandatory import paths and ordering
 
-Apply [import-paths.md](references/import-paths.md) and checklist I1–I2. Prefer the supported source alias (normally `@/` mapped to `src/`) for source-root and cross-directory imports instead of deep relative traversal. If no suitable alias exists, inspect the actual source root and all affected resolvers, then configure the minimal consistent mapping directly in default repair mode. Explicit review-only restrictions still apply. Do not claim support based on TypeScript paths alone. Sort imports using the project's established convention while preserving side-effect order, runtime resolution, and public feature boundaries.
+Apply [import-paths.md](references/import-paths.md) and checklist I1–I2. Before rewriting or retaining each target import, derive both relative and source-alias candidates, verify that they resolve to the same permitted module, compare their lengths, and record the decision. Choose the shorter readable valid form. Keep an existing relative path when the alias would be longer or equal; alias usage alone is not a goal. If a missing alias would shorten target imports, inspect the source root and affected resolvers, then configure the minimal consistent mapping directly in default repair mode. Do not add alias configuration when it provides no shorter target paths. Explicit review-only restrictions still apply. Do not claim support based on TypeScript paths alone. Sort imports using the project's established convention while preserving side-effect order, runtime resolution, and public feature boundaries.
 
 ## Required encapsulation and reuse review
 
@@ -74,7 +74,8 @@ After making fixes in the default repair mode, inspect the relevant project's `p
 1. **Format:** Execute the project's format command if supported. Inspect any changes it makes. If it fails, diagnose and fix the cause, then restart at step 1. A formatting check does not replace the project's formatting command when a formatter is available.
 2. **Lint:** Once formatting succeeds (or is unsupported), execute the project's lint command if supported. Fix lint failures, then return to step 1. Do not proceed to tests while a supported formatting or lint step still fails. Lint autofixes that modify files also require a restart from step 1.
 3. **Tests:** Once the earlier supported steps pass, execute the project's test command if supported, using its documented non-watch/CI mode when necessary. If tests fail, diagnose and fix the cause, then return to step 1 so formatting and lint are rechecked before testing again.
-4. **Finish:** Stop only after the supported steps pass in order against the final files. If a later fix, typecheck, build, or integration check changes those files, restart at step 1. Report the actual commands and results, plus unsupported or blocked steps. Unsupported commands are skipped explicitly, never reported as passed.
+4. **Checklist recheck:** After supported commands pass, re-read the final scoped changes and evaluate every checklist ID again, including previously passing and not-applicable items. Reassess applicability after refactoring; record current evidence rather than copying earlier statuses. Any new or remaining failure returns to repair and step 1.
+5. **Finish:** Stop only after the supported steps pass in order against the final files and every applicable checklist item passes the final manual recheck. If a later fix, typecheck, build, or integration check changes those files, restart at step 1. Report the actual commands and results, plus unsupported or blocked steps. Unsupported commands are skipped explicitly, never reported as passed.
 
 Continue this repair loop until the failures are resolved; do not stop after merely reporting a fixable lint or test error. Diagnose between attempts rather than rerunning unchanged commands indefinitely. Preserve assertions and meaningful checks: do not skip failing tests, weaken expectations, disable lint rules, or alter scripts just to obtain a successful exit code.
 
@@ -93,6 +94,8 @@ pnpm run format → pnpm run lint → pnpm run test → all pass
 ```
 
 ## Review output
+
+The initial and final item-by-item checklist reports are mandatory. Show every ID from the checklist, its status, and concrete evidence or a reason for not-applicable/blocked status. Preserve fail → pass transitions so the user can see what was repaired. Never replace the table with “all checks evaluated” or a category summary. Report command results separately and distinguish passed, failed, skipped/unsupported, and blocked checks. A scoped task must label not-applicable items honestly rather than claiming a full-module audit. See the reference for the required report lifecycle.
 
 For each material finding give: severity, location, the reader's specific difficulty, its maintenance consequence, the proposed repair, and the behavior that must remain unchanged. Distinguish a defect from an optional style preference. When useful, show a small TypeScript before/after pair; do not rewrite an entire file merely to illustrate one finding.
 

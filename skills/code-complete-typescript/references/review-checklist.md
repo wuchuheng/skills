@@ -4,7 +4,7 @@ Use this checklist for every scoped review or repair. It is an execution gate, n
 
 ## Tracking rules
 
-Create a working row for every ID below with: **ID, status, target location, evidence or repair task**. Initial status is **pending**. After inspection use **pass**, **fail**, **not applicable**, or **blocked**. Every not-applicable decision needs a concrete reason; lack of inspection is pending, not not-applicable. A pass needs inspected evidence or a check result. A fail needs a location and actionable repair. Distinguish unsupported project scripts from commands that exist but fail to run.
+Publish a user-visible working row for every ID below with: **ID, status, target location, evidence or repair task**. Initial status is **pending**. After inspection use **pass**, **fail**, **not applicable**, or **blocked**. Every not-applicable decision needs a concrete reason; lack of inspection is pending, not not-applicable. A pass needs inspected evidence or a check result. A fail needs a location and actionable repair. Distinguish unsupported project scripts from commands that exist but fail to run.
 
 All checks must be evaluated, but applicability does not require manufacturing a construct: code without asynchronous effects does not need new Promise handling, and a tiny expression does not need invented phases. Inspecting every duplication candidate is mandatory. Two or more occurrences of the same rule or domain value require canonical reuse and migration of the relevant consumers; merely considering extraction does not pass. Independent meanings and intentionally independent test expectations require an evidenced exception, not a generic style preference.
 
@@ -16,7 +16,7 @@ All checks must be evaluated, but applicability does not require manufacturing a
 | R2 | Every variable and constant has a readable name that communicates meaning and role. | Parameters, locals, loop/destructured bindings, callbacks, catch bindings, and static values inspected at use sites; ambiguous names replaced; units and boolean meaning clear. |
 | R3 | Repeated same-rule logic has one cohesive implementation reused by its consumers. | Duplication inventory, canonical helper search, migrated call sites, preserved effects/errors, and evidence for any retained independent logic. |
 | R4 | Repeated same-domain runtime literals, including switch cases, use a canonical value owner. | Locations inventoried; constants/value objects/enums reused across relevant consumers; remaining raw literals explained; exact wire values verified independently. |
-| I1 | Source imports prefer a supported alias over deep relative traversal. | Alias root and applicable compiler/runtime/test resolvers inspected; missing mapping configured where feasible; target imports migrated and resolution checked without crossing private feature boundaries. |
+| I1 | Source imports use the shorter readable valid path, relative or aliased. | Record both candidate paths, validity, lengths, and the selection before editing; retain the current spelling on equal lengths; establish missing alias support only where it shortens target imports; verify applicable resolvers and public boundaries. |
 | I2 | Imports follow a consistent, safe ordering convention. | Existing sorter/config followed or documented grouping used; sortable imports/specifiers ordered; side-effect barriers and intentional initialization order preserved. |
 | T1 | Types express established domain knowledge; untrusted values are validated. | Boundary narrowing and internal types inspected; no assertion substituted for validation. |
 | T2 | State variants and defaults preserve valid zero, false, empty, and missing values. | Relevant branches and default behavior inspected; semantic changes explicitly identified. |
@@ -41,12 +41,21 @@ All checks must be evaluated, but applicability does not require manufacturing a
 | V2 | Additional required typecheck/build/integration checks pass for the changed boundary. | Actual results or a concrete reason each check is not applicable or blocked. |
 | F1 | Final changes satisfy the applicable checklist and remain within authorized scope. | Fresh diff/status review, rechecked requirements, and unresolved items disclosed. |
 
+## Mandatory visible report lifecycle
+
+1. **Initial assessment:** Before repairs, show one row for every ID with its requirement, status, target, and evidence or planned check. Use pending where evidence is still missing. Define the scope so not-applicable statuses have meaning.
+2. **Repair tracking:** Map each failed item to a concrete repair task. As fixes and verification proceed, report status changes for affected IDs. A patch alone moves an item toward recheck, not directly to pass. Retain the original failure in the record.
+3. **Final report:** Show every ID again with initial status, final status, and concise evidence. Include per-command results and any skips/blockers, then summarize the actual repairs. A generic statement that the checklist was evaluated does not satisfy this requirement, even when all test commands pass.
+4. **Completion gate:** Count final pass/fail/not-applicable/pending/blocked rows and reconcile the total with the current checklist IDs. No item may disappear. No repair completion claim is allowed while an applicable item is failed, pending, or blocked. Do not manufacture pass status for requirements outside a deliberately narrow task.
+
+A tool task tracker may accompany these reports but cannot replace their user-visible tables. Do not require approval between the initial report and default-mode repairs. A detailed linked report may supplement the answer; it does not replace the final per-ID status table unless the user explicitly requests artifact-only reporting.
+
 ## Repair and recheck cycle
 
 1. Inspect the target and classify every checklist item. A concrete violation of an applicable required rule must become a finding; do not downgrade it to optional style merely because tests pass.
 2. In the default review-and-repair mode, immediately create and execute repair tasks for failed items, recording affected locations and intended behavior preservation. No separate fix request or approval is needed for ordinary scoped repairs. Explicit review-only or teaching-only instructions override this default.
 3. Apply the repairs and run the required format → lint → tests loop. Every corrective edit restarts that loop; preserve existing assertions and checks.
-4. Re-read the final code and re-evaluate every applicable checklist item, including comments, numbered substeps, blank lines, and any newly touched routines. Do not mark a task complete merely because a patch was applied or a formatter passed.
+4. Re-read the final scoped code and evaluate every checklist ID again, not only the items that initially failed. Recheck previously passing items and reassess not-applicable items against the final implementation: a repair may introduce new helpers, constants, imports, or failure paths. Cover comments, numbered substeps, blank lines, and any newly touched routines. Record fresh evidence for the final state; do not mechanically copy initial statuses. Keep the original review scope rather than narrowing the final audit to repaired lines. Do not mark a task complete merely because a patch was applied or a formatter passed.
 5. If the manual recheck finds another violation, fix it and repeat verification. Stop when applicable items pass; if genuinely blocked, report incomplete verification and the precise blocker rather than claiming success or retrying unchanged commands indefinitely.
 
 For explicit review-only work, completion means the applicable requirements have been inspected and findings reported; failed items can remain as findings. For repair work, completion requires no remaining applicable failures or pending checks. A blocked item prevents an unqualified completion claim.
@@ -60,4 +69,8 @@ For explicit review-only work, completion means the applicable requirements have
 | E2 | not applicable | Pure string-normalization helper | No throwing operation, Promise, recovery handler, or owned resource in this helper. |
 | V1 | pending | Project package scripts | Discover and run supported commands after the repair; record individual format/lint/test outcomes. |
 
-These are illustrative entries, not a substitute for evaluating every ID against the actual scope. In the final response, summarize completed repairs and verification, and explicitly list failures or blockers; avoid dumping repetitive passing rows when a compact summary is sufficient.
+These are illustrative entries, not a substitute for evaluating every ID against the actual scope. The final response must include the complete per-ID status table, followed by the repair summary, command outcomes, and unresolved items. Concise rows are encouraged; omitting passing rows or replacing them with a category summary is not allowed.
+
+## Recheck example
+
+If fixing R6 extracts a nested block into a helper, R6 passing does not finish the review. Re-evaluate all IDs: the helper may introduce a name to check under R2, duplicated logic under R3, comments under C1–C6, or an error path under E2–E3. If any applicable item fails, repair it, restart the supported format → lint → tests loop, and repeat the complete checklist recheck. Preserve initial failures and final evidence in the report.
