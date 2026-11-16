@@ -20,7 +20,7 @@ A code review and refactoring guide for making TypeScript easier to understand a
 - **Reuse:** Evaluate whether logic should become a shared function and whether repeated domain literals should become constants, value objects, or enums.
 - **Types and failures:** Validate untrusted data, use meaningful internal types, and make exception handling and cleanup ownership explicit.
 - **Comments:** Document contracts and intent, and preserve numbered input, processing, and return steps.
-- **Safe changes:** Distinguish behavior-preserving refactoring from bug fixes and API changes, then verify the affected behavior.
+- **Safe changes:** Distinguish behavior-preserving refactoring from bug fixes and API changes. Run supported project commands in order: format, lint, then tests. Fix failures and restart from formatting until verification passes.
 
 It supports three modes: review without editing, authorized refactoring, and teaching with original TypeScript examples. It is not a general security audit or a formatting-only tool.
 
