@@ -21,9 +21,19 @@ The user explicitly requires numeric step prefixes: `1.` means input, `2.` means
 
 For routines with multiple logical steps (including the source skill's longer-than-ten-lines routines with distinct phases), use these numeric prefixes and keep explanatory text specific. Retain existing numeric prefixes even when a routine becomes shorter. Tiny expressions need no fabricated input/processing blocks; when labeling a return-only routine, use `3.` rather than inventing work. Place labels inside function bodies, never at module scope or on fields.
 
-Use substeps such as `1.1` or `2.1` when a phase needs detail. Early rejection stays with the input guard; do not move returns or restructure control flow to make numbering sequential. For async functions, explain what is awaited and what completion means. Cleanup in `finally` remains unconditional processing and must not be moved or described as success-only return. A returned cleanup function is the factory's return value and can have its own internal phases.
+When a phase contains multiple distinct operations, each operation must have a numbered substep comment such as `1.1`, `1.2`, or `2.1`, `2.2`, `2.3`. A single major-phase heading does not satisfy this requirement for a multi-operation block. Early rejection stays with the input guard; do not move returns or restructure control flow to make numbering sequential. For async functions, explain what is awaited and what completion means. Cleanup in `finally` remains unconditional processing and must not be moved or described as success-only return. A returned cleanup function is the factory's return value and can have its own internal phases.
 
 In tests, `1.` prepares fixtures, `2.` exercises behavior and verifies assertions, and `3.` completes the test or returns fixture handles. Do not mislabel assertions as a returned value. Ordinary why-comments and compiler directives remain valid without prefixes; the convention applies to step markers, not every comment.
+
+## Check substep coverage inside major phases
+
+Do not stop reviewing after finding `1.`, `2.`, and `3.`. Read the code inside each phase and identify changes in purpose: parsing, filtering, reconciliation, dispatch, acknowledgment, and cleanup can be separate operations. Every distinct operation in a multi-operation phase needs a meaningful numbered marker immediately before its logical block, with a blank line separating it from the preceding block.
+
+Use sibling numbering in order (`2.1`, `2.2`, `2.3`); use `2.2.1` and `2.2.2` only when a substep itself contains distinct operations. A parent `2.` summary may introduce its children, but need not repeat their descriptions. Nested function bodies describe their own execution and restart their own phase numbering rather than inheriting the enclosing factory's step numbers.
+
+A substep can be short if its responsibility is distinct. Conversely, do not number each assignment or each line of a cohesive calculation. Write what the operation achieves or which invariant it protects, not “Do step 2.1.” Comments and blank lines work together: spacing alone does not replace required substep comments, and numbered comments without spacing do not provide the required separation.
+
+If numbering exposes a large operation with unrelated responsibilities, also consider cohesive function extraction under the reuse rules. Do not use many numbered comments to excuse excessive complexity. Preserve execution order and all failure paths when repairing comments; extraction is a separate refactoring decision.
 
 ## Original TypeScript before/after examples
 
@@ -108,17 +118,20 @@ export function summaryBefore(input: string, publish: (tokens: readonly string[]
 }
 ```
 
-After: the required prefixes identify normalization, processing, and the returned outcome. Publication is an effect in the processing phase.
+After: tokenization, deduplication, and publication are three distinct processing operations. Each receives a numbered substep and a preceding blank line. A single `2.` comment over the entire processing block would leave these operations insufficiently documented.
 
 ```ts
 export function summaryAfter(input: string, publish: (tokens: readonly string[]) => void): number {
   // 1. Normalize surrounding whitespace without changing token case.
   const normalized = input.trim();
 
-  // 2. Preserve first occurrence order when removing exact duplicate tokens.
+  // 2.1 Split nonempty text into whitespace-delimited tokens.
   const tokens = normalized === '' ? [] : normalized.split(/\s+/);
+
+  // 2.2 Remove exact duplicates while preserving first occurrence order.
   const uniqueTokens = [...new Set(tokens)];
 
+  // 2.3 Publish the token snapshot before reporting completion.
   publish(uniqueTokens);
 
   // 3. Report the size of the token set that was published.

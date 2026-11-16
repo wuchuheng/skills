@@ -22,7 +22,7 @@ A code review and refactoring guide for making TypeScript easier to understand a
 - **Comments:** Document contracts and intent, and preserve numbered input, processing, and return steps.
 - **Safe changes:** Distinguish behavior-preserving refactoring from bug fixes and API changes. Run supported project commands in order: format, lint, then tests. Fix failures and restart from formatting until verification passes.
 
-It supports three modes: review without editing, authorized refactoring, and teaching with original TypeScript examples. It is not a general security audit or a formatting-only tool.
+It supports three modes: review without editing, authorized refactoring, and teaching with original TypeScript examples. Without an explicit target, reviews cover current staged, unstaged, and relevant untracked changes. A mandatory applicability checklist tracks requirements and is rechecked after repairs. It is not a general security audit or a formatting-only tool.
 
 Read the [skill instructions](skills/code-complete-typescript/SKILL.md) for its workflow and links to detailed references.
 

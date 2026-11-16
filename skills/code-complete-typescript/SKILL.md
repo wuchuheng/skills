@@ -17,6 +17,16 @@ Do not expand a focused request into a repository rewrite. Do not interpret a re
 
 Read [criteria.md](references/criteria.md) for the review criteria. Consult only relevant sections of [typescript-examples.md](references/typescript-examples.md) when choosing a repair. Read [research.md](references/research.md) when citing the book or distinguishing book guidance from modern TypeScript adaptations.
 
+## Default scope and mandatory checklist
+
+If the user specifies files, a directory, a diff, or a revision range, use that scope. Otherwise, default to the current repository's changed files: staged changes, unstaged changes, and relevant untracked files. Inspect `git status --short`, `git diff --cached`, `git diff`, and untracked file contents; do not assume `git diff` alone includes all changes. Use rename/deletion information and compare against HEAD where available (an unborn repository has no HEAD). Do not stage, reset, or discard files merely to review them.
+
+Review changed hunks in their enclosing routines and types. Read callers, contracts, and tests as needed to establish behavior; this contextual reading does not authorize unrelated edits. Exclude generated/vendor files from manual rewriting and report any relevant excluded files. Honor explicit narrower scope, including staged-only requests. If the worktree is clean, report that there are no current changes and ask for a target only if needed; do not silently review the whole repository or choose a commit range. Outside Git, use provided files or ask for the missing scope.
+
+Before reviewing or fixing, instantiate the [mandatory requirement checklist](references/review-checklist.md) as a working TODO list in the response or available task tracker. Evaluate every requirement against the target; record applicability and evidence, not just a blanket promise to follow the skill. Do not create a repository tracking file unless requested or required by the project.
+
+In review mode, record findings without edits. When fixes are authorized, turn applicable failures into repair tasks, complete them, and recheck the full applicable checklist against the final changes. Reinspect status/diffs to include newly edited files. Passing format/lint/tests does not replace this manual requirement check. Do not declare all issues fixed while applicable failures, pending checks, or blockers remain.
+
 ## Required working discipline
 
 1. Establish the observable contract before editing: inputs, outputs, exceptions, mutations, side-effect order, async ordering, cancellation, and resource ownership. Inspect callers when available. For a pasted snippet without caller access, give a bounded review and state assumptions and missing evidence; a suspicious pattern is not automatically a defect.
@@ -39,7 +49,7 @@ When scoped code can throw, reject, recover, or own resources, apply [exception-
 
 ## Required commenting review
 
-For scoped JS/TS/TSX code, apply [commenting.md](references/commenting.md). Document public contracts and non-obvious constraints, failure behavior, ownership, and ordering. Prefer clearer names or structure over comments that narrate mechanics. Verify comments against implementation and tests; remove stale claims. Preserve the user-required step prefixes: `1.`, `2.`, and `3.`. Use numbered phase comments for multi-step routines and substeps for detail; do not remove them as redundant style. See the reference for early returns, asynchronous work, and cleanup. Apply the required [logical-block spacing rules](references/logical-block-spacing.md): separate major phases and distinct substeps with a blank line, while keeping each cohesive group together. Comment and spacing edits must preserve executable behavior and compiler/linter directives.
+For scoped JS/TS/TSX code, apply [commenting.md](references/commenting.md). Document public contracts and non-obvious constraints, failure behavior, ownership, and ordering. Prefer clearer names or structure over comments that narrate mechanics. Verify comments against implementation and tests; remove stale claims. Preserve the user-required step prefixes: `1.`, `2.`, and `3.`. Use numbered phase comments for multi-step routines. When a phase contains multiple distinct operations, require numbered substep comments (`2.1`, `2.2`, `2.3`, for example) for each operation; one broad `2.` heading is insufficient. Separate substeps with blank lines and do not remove their markers as redundant style. See the reference for early returns, asynchronous work, and cleanup. Apply the required [logical-block spacing rules](references/logical-block-spacing.md): separate major phases and distinct substeps with a blank line, while keeping each cohesive group together. Comment and spacing edits must preserve executable behavior and compiler/linter directives.
 
 ## Required verification and repair loop
 
