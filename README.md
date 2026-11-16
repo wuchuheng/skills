@@ -17,7 +17,7 @@ This repository currently contains one skill. The list below covers every skill 
 A code review and refactoring guide for making TypeScript easier to understand and maintain. Use it when reviewing a change, simplifying a working module, or learning how to improve code through before/after examples.
 
 - **Readability:** Improve names, simplify conditions, and organize cohesive functions.
-- **Reuse:** Evaluate whether logic should become a shared function and whether repeated domain literals should become constants, value objects, or enums.
+- **Reuse:** Consolidate repeated same-rule logic into cohesive helpers and repeated same-domain literals into canonical constants, value objects, or enums. Track occurrences, migrate consumers, and verify ownership and dependency direction.
 - **Types and failures:** Validate untrusted data, use meaningful internal types, and make exception handling and cleanup ownership explicit.
 - **Architecture:** Make lifecycle transitions, dispatch coverage, and effect ordering auditable; use deterministic coordination in race tests and accurate language-tagged documentation examples.
 - **Comments:** Document contracts and intent, and preserve numbered input, processing, and return steps.

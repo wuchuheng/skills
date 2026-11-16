@@ -6,7 +6,7 @@ Use this checklist for every scoped review or repair. It is an execution gate, n
 
 Create a working row for every ID below with: **ID, status, target location, evidence or repair task**. Initial status is **pending**. After inspection use **pass**, **fail**, **not applicable**, or **blocked**. Every not-applicable decision needs a concrete reason; lack of inspection is pending, not not-applicable. A pass needs inspected evidence or a check result. A fail needs a location and actionable repair. Distinguish unsupported project scripts from commands that exist but fail to run.
 
-All checks must be evaluated, but applicability does not require manufacturing a construct: code without asynchronous effects does not need new Promise handling, and a tiny expression does not need invented phases. Considering extraction is mandatory; extracting every block is not. Likewise, consider domain constants/enums by meaning rather than automatically replacing every literal.
+All checks must be evaluated, but applicability does not require manufacturing a construct: code without asynchronous effects does not need new Promise handling, and a tiny expression does not need invented phases. Inspecting every duplication candidate is mandatory. Two or more occurrences of the same rule or domain value require canonical reuse and migration of the relevant consumers; merely considering extraction does not pass. Independent meanings and intentionally independent test expectations require an evidenced exception, not a generic style preference.
 
 | ID | Required check | Evidence needed to close it |
 | --- | --- | --- |
@@ -14,8 +14,8 @@ All checks must be evaluated, but applicability does not require manufacturing a
 | B1 | Establish observable behavior and distinguish refactors, bug fixes, and API/model changes. | Relevant inputs, results, mutation, failure, ordering, and compatibility assumptions. |
 | R1 | Conditions and nesting express recognizable decisions without hiding evaluation order. | Inspected conditions; short-circuit and effect counts preserved by any repair. |
 | R2 | Names communicate purpose, units, and effects; variables have one role and appropriate scope. | Inspected declarations and call sites; ambiguity repaired where demonstrated. |
-| R3 | Routines are cohesive; substantial blocks and repeated rules are evaluated for extraction and reuse. | Existing helper search and reason to extract, reuse, or keep a block local. |
-| R4 | Repeated literals have appropriate domain ownership. | Shared meanings distinguished from coincidentally equal values; representation choice justified. |
+| R3 | Repeated same-rule logic has one cohesive implementation reused by its consumers. | Duplication inventory, canonical helper search, migrated call sites, preserved effects/errors, and evidence for any retained independent logic. |
+| R4 | Repeated same-domain runtime literals, including switch cases, use a canonical value owner. | Locations inventoried; constants/value objects/enums reused across relevant consumers; remaining raw literals explained; exact wire values verified independently. |
 | T1 | Types express established domain knowledge; untrusted values are validated. | Boundary narrowing and internal types inspected; no assertion substituted for validation. |
 | T2 | State variants and defaults preserve valid zero, false, empty, and missing values. | Relevant branches and default behavior inspected; semantic changes explicitly identified. |
 | E1 | Effects, dependencies, subscriptions, and resource lifetimes have clear owners. | Ordering, cleanup, cancellation, and disposal paths inspected where present. |
@@ -25,6 +25,7 @@ All checks must be evaluated, but applicability does not require manufacturing a
 | C3 | Multi-operation phases have meaningful numbered substep comments. | Each distinct operation mapped to `2.1`, `2.2`, etc.; one broad heading is insufficient. |
 | C4 | Blank lines separate major phases and distinct substeps while related statements stay together. | Visual inspection, including nested blocks; comments remain attached to their code. |
 | C5 | Every numbered block obeys the mandatory responsibility boundaries in [commenting.md](commenting.md). | `1.x` contains argument preparation; `2.x` contains business decisions/effects and checks on newly received data; `3.x` produces the final output. No business lookup disguised as input validation, scattered original-argument defaults in processing, or hidden business effects in return construction. |
+| R5 | Reuse preserves high cohesion and low coupling. | One clear responsibility per extracted owner; dependencies flow toward the owning contract/policy; no catch-all utilities, cycles, or mode flags joining unrelated rules. |
 | A1 | Stateful orchestration has auditable transitions and ownership. | Valid state combinations, mutation owners, captures across awaits, and terminal admission rules inspected; grouped flags justified or replaced when they hide contradictions. |
 | A2 | Finite operation dispatch preserves type evidence and coverage. | Unknown wire variants rejected; every declared operation reaches a handler and validator; assertions have a nearby validation proof; additions cannot silently fall through to a success-shaped default. |
 | A3 | Effectful work is visible at the correct abstraction level. | Dispatch, waiting, validation, mutation, and cleanup can be followed without decoding nested return expressions; helpers reduce concepts rather than merely relocating lines. |
