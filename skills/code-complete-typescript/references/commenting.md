@@ -25,6 +25,7 @@ These boundaries are mandatory and apply to every substep, including nested numb
 
 ### Boundary decisions reviewers must enforce
 
+- In a dedicated parser or validator, parsing/schema evaluation is the routine's core `2.x` work; `1.x` is only any prerequisite argument preparation. Classify relative to the routine's purpose rather than assigning every check to input handling.
 - Checking that `findingId` is a safe integer is `1.x`; checking whether that finding exists in the session or may be removed is `2.x`.
 - A default for a caller-supplied argument is `1.x`. A fallback selected from business state or an external response is a `2.x` policy decision, not an argument default.
 - Validating a response after `await` is `2.x`, next to the received data. Never hoist that check to `1.x` before the data exists or omit it because processing supposedly cannot validate anything.
