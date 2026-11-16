@@ -32,12 +32,12 @@ All checks must be evaluated, but applicability does not require manufacturing a
 ## Repair and recheck cycle
 
 1. Inspect the target and classify every checklist item. A concrete violation of an applicable required rule must become a finding; do not downgrade it to optional style merely because tests pass.
-2. If the user asks for fixes, create repair tasks for failed items with affected locations and intended behavior preservation. Review-only instructions do not authorize those edits.
+2. In the default review-and-repair mode, immediately create and execute repair tasks for failed items, recording affected locations and intended behavior preservation. No separate fix request or approval is needed for ordinary scoped repairs. Explicit review-only or teaching-only instructions override this default.
 3. Apply the repairs and run the required format → lint → tests loop. Every corrective edit restarts that loop; preserve existing assertions and checks.
 4. Re-read the final code and re-evaluate every applicable checklist item, including comments, numbered substeps, blank lines, and any newly touched routines. Do not mark a task complete merely because a patch was applied or a formatter passed.
 5. If the manual recheck finds another violation, fix it and repeat verification. Stop when applicable items pass; if genuinely blocked, report incomplete verification and the precise blocker rather than claiming success or retrying unchanged commands indefinitely.
 
-For review-only work, completion means the applicable requirements have been inspected and findings reported; failed items can remain as findings. For repair work, completion requires no remaining applicable failures or pending checks. A blocked item prevents an unqualified completion claim.
+For explicit review-only work, completion means the applicable requirements have been inspected and findings reported; failed items can remain as findings. For repair work, completion requires no remaining applicable failures or pending checks. A blocked item prevents an unqualified completion claim.
 
 ## Example working entries
 

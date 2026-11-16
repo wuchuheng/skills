@@ -1,6 +1,6 @@
 ---
 name: code-complete-typescript
-description: Review and improve TypeScript readability and maintainability using Code Complete principles, with attention to conditional complexity, naming, routine cohesion, reuse, domain literals, type boundaries, comments, exception handling, and safe refactoring. Use for substantive readability reviews or cleanup; not formatting-only requests or a general security audit.
+description: Review and improve TypeScript readability and maintainability using Code Complete principles, with attention to conditional complexity, naming, routine cohesion, reuse, domain literals, type boundaries, comments, exception handling, and safe refactoring. Default to reviewing and directly repairing applicable issues unless the user requests read-only review or teaching. Use for substantive readability reviews or cleanup; not formatting-only requests or a general security audit.
 ---
 
 # Code Complete for TypeScript
@@ -9,11 +9,11 @@ Make the code's intent, permitted states, effects, and failure paths understanda
 
 ## Choose the requested work
 
-- **Review:** Inspect the requested code, callers, contracts, and tests. Report findings without editing.
-- **Refactor:** Make authorized, bounded readability improvements while retaining observable behavior.
-- **Teach:** Explain the difficulty and show an original TypeScript before/after example, including its assumptions and tradeoffs.
+- **Review and repair (default):** Inspect the target, create the required checklist, and directly fix applicable failures. Invoking this skill without an explicit mode, including a general request to check the current changes, does not require a separate approval question before ordinary scoped repairs. Continue until all applicable checklist items pass and supported verification commands succeed.
+- **Review only:** When the user explicitly asks for findings only, no edits, read-only analysis, or a review artifact without modifications, inspect and report without changing files. Explicit user constraints take precedence over the default.
+- **Teach:** When the request is explanation or examples only, explain the difficulty and show original TypeScript before/after examples without editing the project.
 
-Do not expand a focused request into a repository rewrite. Do not interpret a request to assess code as authorization to change its API or business behavior.
+Do not expand a focused request into a repository rewrite. Default repair covers scoped readability, maintainability, and evidence-backed correctness fixes that preserve established contracts. Identify bug fixes separately. It does not authorize inventing business requirements, redesigning public APIs, changing intended behavior to satisfy tests, committing, pushing, or publishing. Ask only when a material ambiguity or action outside that scope prevents progress; do not ask again for permission to perform ordinary checklist repairs.
 
 Read [criteria.md](references/criteria.md) for the review criteria. Consult only relevant sections of [typescript-examples.md](references/typescript-examples.md) when choosing a repair. Read [research.md](references/research.md) when citing the book or distinguishing book guidance from modern TypeScript adaptations.
 
@@ -25,7 +25,7 @@ Review changed hunks in their enclosing routines and types. Read callers, contra
 
 Before reviewing or fixing, instantiate the [mandatory requirement checklist](references/review-checklist.md) as a working TODO list in the response or available task tracker. Evaluate every requirement against the target; record applicability and evidence, not just a blanket promise to follow the skill. Do not create a repository tracking file unless requested or required by the project.
 
-In review mode, record findings without edits. When fixes are authorized, turn applicable failures into repair tasks, complete them, and recheck the full applicable checklist against the final changes. Reinspect status/diffs to include newly edited files. Passing format/lint/tests does not replace this manual requirement check. Do not declare all issues fixed while applicable failures, pending checks, or blockers remain.
+In explicit review-only mode, record findings without edits. Otherwise, turn applicable failures into repair tasks immediately, complete them, and recheck the full applicable checklist against the final changes without waiting for separate fix approval. Reinspect status/diffs to include newly edited files. Passing format/lint/tests does not replace this manual requirement check. Do not declare all issues fixed while applicable failures, pending checks, or blockers remain.
 
 ## Required working discipline
 
@@ -34,7 +34,7 @@ In review mode, record findings without edits. When fixes are authorized, turn a
 3. Separate **refactoring**, **bug fixes**, and **API/model changes**. Identify the latter two explicitly and keep them within the user's authorization. Do not silently change defaults, validation strictness, callback timing, error handling, or parallelism during cleanup.
 4. Preserve short-circuit evaluation and side-effect counts. Do not eagerly calculate named booleans if the original expression skipped those operations. Preserve evaluation order for getters, effectful functions, and mutable state.
 5. Keep `unknown` for genuinely untrusted data; narrow or parse it before domain use. Replace unnecessary internal `unknown`, `any`, and casts with meaningful types. Never replace runtime validation with an assertion just to obtain a cleaner signature.
-6. Keep refactorings small and reviewable. Preserve existing work and assertions. After authorized fixes, complete the required format → lint → tests loop below. Focused tests can help diagnose failures but do not replace the supported project test command. Also run required typechecks and integration/build checks when the changed boundary calls for them. Add a regression case for an uncovered defect, not tests that merely mirror renamed helpers.
+6. Keep refactorings small and reviewable. Preserve existing work and assertions. After fixes, complete the required format → lint → tests loop below. Focused tests can help diagnose failures but do not replace the supported project test command. Also run required typechecks and integration/build checks when the changed boundary calls for them. Add a regression case for an uncovered defect, not tests that merely mirror renamed helpers.
 7. For a refactor, stop when the requested scope is clearer and verified; report what improved, preserved behavior, checks actually run, and unresolved limitations. For review-only work, report recommendations and evidence limits without implying edits or requiring execution unavailable to the review. No automatic commits or unrelated configuration changes.
 
 ## Required encapsulation and reuse review
@@ -53,7 +53,7 @@ For scoped JS/TS/TSX code, apply [commenting.md](references/commenting.md). Docu
 
 ## Required verification and repair loop
 
-After making authorized fixes, inspect the relevant project's `package.json`, package-manager declaration, lockfile, and repository guidance. Use its existing format, lint, and test scripts with the established package manager and working directory. Check documented equivalents when a script has another name. In a workspace, use its prescribed root orchestration or affected-package commands. Do not invent scripts or install a new toolchain solely to satisfy this loop.
+After making fixes in the default repair mode, inspect the relevant project's `package.json`, package-manager declaration, lockfile, and repository guidance. Use its existing format, lint, and test scripts with the established package manager and working directory. Check documented equivalents when a script has another name. In a workspace, use its prescribed root orchestration or affected-package commands. Do not invent scripts or install a new toolchain solely to satisfy this loop.
 
 1. **Format:** Execute the project's format command if supported. Inspect any changes it makes. If it fails, diagnose and fix the cause, then restart at step 1. A formatting check does not replace the project's formatting command when a formatter is available.
 2. **Lint:** Once formatting succeeds (or is unsupported), execute the project's lint command if supported. Fix lint failures, then return to step 1. Do not proceed to tests while a supported formatting or lint step still fails. Lint autofixes that modify files also require a restart from step 1.
@@ -64,7 +64,7 @@ Continue this repair loop until the failures are resolved; do not stop after mer
 
 Respect the authorized scope and existing user changes. Investigate failures outside the edited code rather than assuming they predate the work. If resolving a failure requires an unrelated behavior change or unavailable external resources, identify the evidence and concrete blocker, state that verification is incomplete, and request only the missing information or authorization. A missing service or credential is not a passed test and cannot be repaired by retrying forever.
 
-This loop applies to implementation and repair work. A review-only request remains read-only: do not run a mutating formatter or make fixes without authorization. A teaching-only snippet need not acquire a new project scaffold. These workflow requirements are user-defined verification policy, not claims about commands prescribed by Code Complete.
+This loop applies to implementation and repair work. An explicit review-only request remains read-only: do not run a mutating formatter or make fixes. A general invocation without that restriction uses the default repair mode. A teaching-only snippet need not acquire a new project scaffold. These workflow requirements are user-defined verification policy, not claims about commands prescribed by Code Complete.
 
 For example, in a pnpm project exposing `format`, `lint`, and a one-shot `test` script, a test repair requires the full sequence again:
 
