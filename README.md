@@ -6,11 +6,25 @@ Repository mirrors: [GitHub](https://github.com/wuchuheng/skills) · [Codeberg](
 
 ## Available skills
 
+This repository currently contains one skill. The list below covers every skill included here.
+
 | Skill | Purpose |
 | --- | --- |
 | [code-complete-typescript](skills/code-complete-typescript/SKILL.md) | Review and improve TypeScript readability and maintainability using practical Code Complete principles. |
 
-The TypeScript skill covers naming, conditions, cohesive functions, reuse, domain literals, type boundaries, exceptions, comments, and behavior-preserving refactoring. Its references contain original TypeScript before/after examples.
+### code-complete-typescript
+
+A code review and refactoring guide for making TypeScript easier to understand and maintain. Use it when reviewing a change, simplifying a working module, or learning how to improve code through before/after examples.
+
+- **Readability:** Improve names, simplify conditions, and organize cohesive functions.
+- **Reuse:** Evaluate whether logic should become a shared function and whether repeated domain literals should become constants, value objects, or enums.
+- **Types and failures:** Validate untrusted data, use meaningful internal types, and make exception handling and cleanup ownership explicit.
+- **Comments:** Document contracts and intent, and preserve numbered input, processing, and return steps.
+- **Safe changes:** Distinguish behavior-preserving refactoring from bug fixes and API changes, then verify the affected behavior.
+
+It supports three modes: review without editing, authorized refactoring, and teaching with original TypeScript examples. It is not a general security audit or a formatting-only tool.
+
+Read the [skill instructions](skills/code-complete-typescript/SKILL.md) for its workflow and links to detailed references.
 
 Numbered step comments use `1.` for input, `2.` for processing, and `3.` for return. Write the useful description directly after the number, without category labels:
 
