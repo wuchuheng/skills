@@ -98,17 +98,19 @@ export function totalAfter(amounts: readonly number[], fee: number): number {
 
 ### 3. Keep nested logical groups visible
 
-Inside a loop, reading and checking one candidate form a group; recording a valid candidate is another. A blank line exposes that boundary without adding a comment to every statement.
+Inside a loop, checking whether a prepared candidate qualifies for the result and recording it are separate groups. A blank line exposes that boundary without adding a comment to every statement.
 
 Before:
 
 ```ts
 export function selectBefore(values: readonly string[]): string[] {
-  // 1. Prepare independent output storage.
+  // 1. Normalize the supplied values.
+  const normalizedValues = values.map(value => value.trim());
+
+  // 2.1 Prepare independent output storage.
   const selected: string[] = [];
-  // 2. Collect nonempty normalized values.
-  for (const value of values) {
-    const normalized = value.trim();
+  // 2.2 Collect nonempty normalized values.
+  for (const normalized of normalizedValues) {
     if (normalized === '') continue;
     selected.push(normalized);
   }
@@ -121,12 +123,14 @@ After:
 
 ```ts
 export function selectAfter(values: readonly string[]): string[] {
-  // 1. Prepare independent output storage.
+  // 1. Normalize the supplied values.
+  const normalizedValues = values.map(value => value.trim());
+
+  // 2.1 Prepare independent output storage.
   const selected: string[] = [];
 
-  // 2. Collect nonempty normalized values.
-  for (const value of values) {
-    const normalized = value.trim();
+  // 2.2 Collect nonempty normalized values.
+  for (const normalized of normalizedValues) {
     if (normalized === '') continue;
 
     selected.push(normalized);

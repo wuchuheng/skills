@@ -24,6 +24,7 @@ All checks must be evaluated, but applicability does not require manufacturing a
 | C2 | Multi-step routines retain numeric phase prefixes for input, processing, and return. | `1.`, `2.`, `3.` semantics checked without category-label words or invented phases. |
 | C3 | Multi-operation phases have meaningful numbered substep comments. | Each distinct operation mapped to `2.1`, `2.2`, etc.; one broad heading is insufficient. |
 | C4 | Blank lines separate major phases and distinct substeps while related statements stay together. | Visual inspection, including nested blocks; comments remain attached to their code. |
+| C5 | Every numbered block obeys the mandatory responsibility boundaries in [commenting.md](commenting.md). | `1.x` contains argument preparation; `2.x` contains business decisions/effects and checks on newly received data; `3.x` produces the final output. No business lookup disguised as input validation, scattered original-argument defaults in processing, or hidden business effects in return construction. |
 | Q1 | Tests describe intent and preserve meaningful assertions. | Relevant normal/failure behavior and any needed regression coverage inspected. |
 | V1 | Supported project format, lint, and test commands pass in order after fixes. | Exact commands/results from the required repair loop; unsupported commands explicitly recorded. |
 | V2 | Additional required typecheck/build/integration checks pass for the changed boundary. | Actual results or a concrete reason each check is not applicable or blocked. |

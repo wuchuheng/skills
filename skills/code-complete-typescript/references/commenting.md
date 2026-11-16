@@ -15,15 +15,29 @@ Adapted from the local `js-ts-commenting` skill and reconciled with this skill's
 
 The user explicitly requires numeric step prefixes: `1.` means input, `2.` means processing, and `3.` means return. Write the number followed directly by the useful step description; do not insert category labels such as `Input:`, `Processing:`, or `Return:`. Preserve them during reviews and refactoring; do not downgrade them to optional style or delete them under an anti-over-commenting rule. This is a user convention, not a claim that Code Complete mandates numbered comments.
 
-- `1.` Validate, normalize, or prepare inputs and the per-call context needed to consume them. In a factory, describe the supplied dependencies and per-instance state being prepared; do not imply that initialization validates data when it does not.
-- `2.` Perform the operation, coordinate effects, and make decisions. Use `2.1`, `2.2`, etc. for multiple processing steps, rather than introducing top-level `4.` or higher.
-- `3.` Return or emit the outcome, resolve completion, or hand back an API/cleanup handle. The number identifies the responsibility, not the third statement or a requirement to use exactly three code blocks.
+| Prefix | Required responsibility | Does not belong here |
+| --- | --- | --- |
+| `1.` / `1.x` | Establish the argument contract: check supplied types, shape, ranges and argument relationships; apply documented defaults; normalize or parse arguments into usable inputs. | Cache/database lookups, business eligibility decisions, resource acquisition, or unrelated session-state initialization. |
+| `2.` / `2.x` | Execute the operation using prepared inputs: calculate, query state, check business rules, transform domain data, mutate state, coordinate effects, and release owned resources. Validate newly received external data at the point it enters this processing. | Scattered revalidation or defaulting of the original arguments that should already have been prepared in `1.x`. |
+| `3.` / `3.x` | Construct the final output representation and return it, resolve completion, or hand back the promised API/cleanup handle. | New business decisions, persistence, unrelated notifications, or cleanup hidden as result construction. |
+
+These boundaries are mandatory and apply to every substep, including nested numbering. Inspect what the statements do, not merely whether the comment contains a number. A wrong responsibility assignment is a checklist failure.
+
+### Boundary decisions reviewers must enforce
+
+- Checking that `findingId` is a safe integer is `1.x`; checking whether that finding exists in the session or may be removed is `2.x`.
+- A default for a caller-supplied argument is `1.x`. A fallback selected from business state or an external response is a `2.x` policy decision, not an argument default.
+- Validating a response after `await` is `2.x`, next to the received data. Never hoist that check to `1.x` before the data exists or omit it because processing supposedly cannot validate anything.
+- Factory dependency validation is `1.x`; allocating private session state, attaching listeners, and acquiring resources are `2.x`; returning the API or disposer is `3.x`. A zero-argument factory may have no input phase. Do not label all setup as input handling.
+- Publishing a domain event is normally a `2.x` effect. Emission belongs in `3.x` only when it is itself the routine's promised output delivery, such as a response adapter sending its final result.
+- Early returns and throws stay beside the guard or business decision that requires them. Do not move code or change ordering just to make the labels increase monotonically. Default parameter expressions already prepare inputs at the signature; do not duplicate them in the body merely to add a `1.x` marker.
+- In tests, fixture values representing the operation's inputs can be prepared under `1.x`. Starting a Worker, exercising the operation, assertions, and cleanup are `2.x`. Returning fixture handles or completing the test is `3.x`.
 
 For routines with multiple logical steps (including the source skill's longer-than-ten-lines routines with distinct phases), use these numeric prefixes and keep explanatory text specific. Retain existing numeric prefixes even when a routine becomes shorter. Tiny expressions need no fabricated input/processing blocks; when labeling a return-only routine, use `3.` rather than inventing work. Place labels inside function bodies, never at module scope or on fields.
 
 When a phase contains multiple distinct operations, each operation must have a numbered substep comment such as `1.1`, `1.2`, or `2.1`, `2.2`, `2.3`. A single major-phase heading does not satisfy this requirement for a multi-operation block. Early rejection stays with the input guard; do not move returns or restructure control flow to make numbering sequential. For async functions, explain what is awaited and what completion means. Cleanup in `finally` remains unconditional processing and must not be moved or described as success-only return. A returned cleanup function is the factory's return value and can have its own internal phases.
 
-In tests, `1.` prepares fixtures, `2.` exercises behavior and verifies assertions, and `3.` completes the test or returns fixture handles. Do not mislabel assertions as a returned value. Ordinary why-comments and compiler directives remain valid without prefixes; the convention applies to step markers, not every comment.
+In tests, follow the same responsibility boundaries above; do not mislabel assertions as a returned value or resource acquisition as argument preparation. Ordinary why-comments and compiler directives remain valid without prefixes; the convention applies to step markers, not every comment.
 
 ## Check substep coverage inside major phases
 
@@ -140,3 +154,39 @@ export function summaryAfter(input: string, publish: (tokens: readonly string[])
 ```
 
 For a comment-only repair, verify executable code has not changed and run relevant formatting/lint checks. If a comment exposes a behavior defect, report or fix it within authorization as a separate behavior change; never make a false contract true through an unannounced logic edit.
+
+### 5. Separate argument checks from business-rule checks
+
+Before: the labels incorrectly place a cache lookup in input handling and an argument check in processing.
+
+```ts
+export function removeFindingBefore(id: number, cache: Map<number, string>): void {
+  // 1. Find the entry in the current session.
+  if (!Number.isSafeInteger(id)) throw new Error('Invalid finding ID');
+  const exists = cache.has(id);
+
+  // 2. Validate the supplied identifier.
+  if (exists) cache.delete(id);
+
+  // 3. Complete without a result payload.
+  return;
+}
+```
+
+After: argument validity, state-dependent eligibility, and mutation have separate responsibilities. Only comments and whitespace change; the lookup remains after validation.
+
+```ts
+export function removeFindingAfter(id: number, cache: Map<number, string>): void {
+  // 1.1 Require a safe integer identifier.
+  if (!Number.isSafeInteger(id)) throw new Error('Invalid finding ID');
+
+  // 2.1 Determine whether the current session contains the finding.
+  const exists = cache.has(id);
+
+  // 2.2 Remove the finding only when it exists.
+  if (exists) cache.delete(id);
+
+  // 3. Complete without a result payload.
+  return;
+}
+```
