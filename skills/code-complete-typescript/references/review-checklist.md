@@ -20,6 +20,7 @@ All checks must be evaluated, but applicability does not require manufacturing a
 | T2 | State variants and defaults preserve valid zero, false, empty, and missing values. | Relevant branches and default behavior inspected; semantic changes explicitly identified. |
 | E1 | Effects, dependencies, subscriptions, and resource lifetimes have clear owners. | Ordering, cleanup, cancellation, and disposal paths inspected where present. |
 | E2 | Exceptions and rejections have correct propagation, recovery, and reporting ownership. | No silent success, masked primary failure, or unowned rejection; safe diagnostics. |
+| E3 | Every catch and rejection handler has an explicit, implementation-backed failure policy. | Inventory `catch`, `.catch(...)`, and rejection callbacks; identify recovery, propagation, terminal reporting, or justified suppression. No unexplained no-op, logging-as-success, duplicate reporting, or recursive reporter failure. |
 | C1 | Public contracts and non-obvious rules have accurate, useful documentation. | JSDoc, business intent, and directives inspected; stale or redundant claims repaired. |
 | C2 | Multi-step routines retain numeric phase prefixes for input, processing, and return. | `1.`, `2.`, `3.` semantics checked without category-label words or invented phases. |
 | C3 | Multi-operation phases have meaningful numbered substep comments. | Each distinct operation mapped to `2.1`, `2.2`, etc.; one broad heading is insufficient. |

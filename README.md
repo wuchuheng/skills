@@ -18,7 +18,7 @@ A code review and refactoring guide for making TypeScript easier to understand a
 
 - **Readability:** Improve names, simplify conditions, and organize cohesive functions.
 - **Reuse:** Consolidate repeated same-rule logic into cohesive helpers and repeated same-domain literals into canonical constants, value objects, or enums. Track occurrences, migrate consumers, and verify ownership and dependency direction.
-- **Types and failures:** Validate untrusted data, use meaningful internal types, and make exception handling and cleanup ownership explicit.
+- **Types and failures:** Validate untrusted data, use meaningful internal types, and make exception handling and cleanup ownership explicit. Require every catch or rejection handler to recover, propagate, report once at its owner, or justify safe suppression.
 - **Architecture:** Make lifecycle transitions, dispatch coverage, and effect ordering auditable; use deterministic coordination in race tests and accurate language-tagged documentation examples.
 - **Comments:** Require meaning-and-purpose JSDoc on constants and static variables, document contracts and intent, and preserve numbered input, processing, and return steps.
 - **Safe changes:** Distinguish behavior-preserving refactoring from bug fixes and API changes. Run supported project commands in order: format, lint, then tests. Fix failures and restart from formatting until verification passes.

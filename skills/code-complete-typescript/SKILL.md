@@ -47,7 +47,7 @@ Apply [encapsulation-and-reuse.md](references/encapsulation-and-reuse.md) and re
 
 ## Required exception-handling review
 
-When scoped code can throw, reject, recover, or own resources, apply [exception-handling.md](references/exception-handling.md). Check the failure contract, recovery/propagation owner, abstraction and diagnostic safety, cleanup outcomes, and asynchronous rejection ownership. Treat silent failure, accidental success, masked primary failures, and unowned rejections as correctness findings when reachable. Do not require try/catch in every function, impose a new error hierarchy, or change failure behavior merely to satisfy a style preference.
+When scoped code can throw, reject, recover, or own resources, apply [exception-handling.md](references/exception-handling.md). Require checklist E3 for every catch and rejection handler: recover locally when correct, otherwise propagate, and report once at the owning boundary. Silent suppression needs an implementation-backed explanation of why it is safe; a comment alone is not sufficient. Check the failure contract, recovery/propagation owner, abstraction and diagnostic safety, cleanup outcomes, and asynchronous rejection ownership. Treat silent failure, accidental success, masked primary failures, and unowned rejections as correctness findings when reachable. Do not require try/catch in every function, impose a new error hierarchy, or change failure behavior merely to satisfy a style preference.
 
 ## Required commenting review
 

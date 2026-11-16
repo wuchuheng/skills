@@ -15,6 +15,23 @@ Apply this reference to failure paths in the requested scope. These are this ski
 9. **Classify cancellation and retries explicitly.** Only recognized cancellation for the owned operation may become a cancellation outcome. Do not swallow an unrelated error merely because a signal is now aborted. Retry only when authorized by the operation's policy, limited in attempts/deadline, cancellation-aware, and safe against duplicated effects. No blanket retries for validation errors or programming defects.
 10. **Verify the failure paths affected by a change.** Check success, recognized recoverable failure, unexpected failure, non-Error throws where relevant, operation/cleanup dual failure, and cancellation or detached rejection if present. Preserve error identity, response ordering, and caller-visible behavior during a pure refactor. Any changed failure policy is a bug fix or API change and must be in scope.
 
+## Mandatory catch and rejection-handler audit (E3)
+
+The standard policy is: **recover locally when correct; otherwise propagate; report once at the owning boundary.** Inspect `catch` blocks, `.catch(...)`, and the rejection callback of `.then(success, failure)`. Empty handlers, comments-only handlers, early returns, ignored error parameters, and successful fallback values are candidates for inspection. A nonempty handler is not automatically correct.
+
+For each handler, record its purpose and the implementation evidence supporting one of these outcomes:
+
+- **Recover:** Perform a contractually valid fallback or restore a usable state for the recognized failure. Decide whether the degradation needs a warning under the project's policy.
+- **Propagate:** Preserve or safely translate the failure for the caller. Remove a catch that only rethrows unchanged when it serves no other purpose. A cleanup-only catch must still propagate; prefer `finally` when appropriate without changing failure precedence.
+- **Report at the owner:** An unhandled failure reaching an application boundary or detached task must use the existing reporter, unless a specific safe-suppression policy applies. For awaited operations, retain an explicit failure result or rejection after reporting; logging alone must not turn failure into success. A detached rejection has no awaiting caller, so its reporting handler intentionally terminates that rejection path.
+- **Intentionally suppress:** Add a precise comment identifying the recognized expected failure, why ignoring it is safe, and any remaining cleanup/reporting owner. Verify those claims against code and tests. “Ignore error,” “best effort,” and “already handled” without a concrete owner or invariant do not pass. Suppress only the recognized condition; propagate or report other failures. A logger's noncritical failure can be a broader intentional suppression if that policy is explicit and protects the main operation.
+
+Use warning severity for recoverable degradation and error severity for a failed operation, subject to the project's established severity policy. Do not add `console.error` to every catch or log-and-rethrow at every layer. A local log plus propagation requires a distinct documented diagnostic purpose; otherwise leave reporting to the owner. Never log raw private payloads, credentials, or arbitrary caught objects by default.
+
+A reporting function can throw or reject. Use an existing nonthrowing reporting adapter when available, or implement its documented failure policy. Do not recursively send logger failures back through the same logger. Preserve a primary operation error if cleanup or reporting also fails; report or retain the secondary failure according to the established contract.
+
+If the implementation already propagates correctly, a local log is unnecessary. If a failure is swallowed without recovery or reporting, adding a comment is not sufficient unless evidence proves suppression safe. Repair the failure path in default repair mode, classify any changed outcome as a correctness/API change, and verify the affected scenario. Do not change intentional business behavior to satisfy the checklist.
+
 ## Choosing a response
 
 | Situation | Reasonable response |
@@ -202,3 +219,53 @@ export async function waitAfter<T>(
 ```
 
 **Verify:** Success, owned cancellation, unrelated rejection, and an aborted signal concurrent with an unrelated failure. Merely testing `signal.aborted` or searching an error message is not an adequate implementation of the predicate.
+
+### 7. Propagate to the reporting owner instead of silently succeeding
+
+**Change:** Correctness repair: a failed save now rejects instead of resolving successfully. The caller is the established reporting owner; no duplicate local log is added.
+
+```ts
+export async function saveBefore(save: () => Promise<void>): Promise<void> {
+  try {
+    await save();
+  } catch {}
+}
+
+export async function saveAfter(save: () => Promise<void>): Promise<void> {
+  // 2. Preserve save failures for the awaiting caller that owns reporting.
+  await save();
+}
+```
+
+Verify successful completion and preservation of the original rejection. Confirm the actual caller observes the rejection; if the task is detached, use the reporting pattern in example 5 instead.
+
+### 8. Limit documented suppression to the recognized harmless condition
+
+**Change:** Correctness repair: unexpected deletion failures now propagate. In this example, the supplied adapter uses the documented `ENOENT` code when the optional file is already absent. The optional-file contract permits that outcome.
+
+```ts
+export async function deleteBefore(remove: () => Promise<void>): Promise<void> {
+  try {
+    await remove();
+  } catch {
+    // Ignore deletion errors.
+  }
+}
+
+export async function deleteAfter(remove: () => Promise<void>): Promise<void> {
+  // 2. Attempt deletion and classify only the adapter's expected absence failure.
+  try {
+    await remove();
+  } catch (error: unknown) {
+    const alreadyAbsent =
+      typeof error === 'object' && error !== null &&
+      'code' in error && error.code === 'ENOENT';
+    if (!alreadyAbsent) throw error;
+
+    // The optional file is already absent, so the required final state is satisfied.
+    // No recovery or warning is needed; all other failures propagate to the caller.
+  }
+}
+```
+
+Verify success, expected absence, an unexpected code, and a non-Error rejection. In application code, reuse an existing canonical adapter classifier rather than copying this example's inline classifier into several callers.
